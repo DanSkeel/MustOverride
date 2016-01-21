@@ -14,6 +14,8 @@
 
 - (void)optionalOverride;
 - (void)mustOverride;
+- (void)mustOverrideOnlyNearestSubclass;
+- (void)subclassWillAlsoAskToOverride;
 
 @end
 
@@ -30,6 +32,21 @@
 
     NSLog(@"Must");
 }
+
+- (void)mustOverrideOnlyNearestSubclass
+{
+    SUBCLASS_MUST_OVERRIDE;
+    
+    NSLog(@"Must OnlyNearestSubclass");
+}
+
+- (void)subclassWillAlsoAskToOverride
+{
+    SUBCLASS_MUST_OVERRIDE;
+    
+    NSLog(@"subclassWillAlsoAskToOverride");
+}
+
 
 @end
 
@@ -51,8 +68,30 @@
 
 @implementation ConcreteSubclass
 
-// Doesn't override any methods
+// Doesn't override `mustOverride`, `alsoMustOverride`
 // And will crash as a result.
+
+- (void)mustOverrideOnlyNearestSubclass {
+    NSLog(@"%@ implementatoin of %@", NSStringFromClass(self.class), NSStringFromSelector(_cmd));
+}
+
+- (void)subclassWillAlsoAskToOverride {
+    SUBCLASS_MUST_OVERRIDE;
+    NSLog(@"%@ implementatoin of %@", NSStringFromClass(self.class), NSStringFromSelector(_cmd));
+}
+
+@end
+
+@interface SubclassOfConcreteSubclass : ConcreteSubclass
+@end
+
+@implementation SubclassOfConcreteSubclass
+
+// Will NOT crash on `mustOverrideOnlyNearestSubclass`
+// because super class overrides it
+
+// Will crash on `subclassWillAlsoAskToOverride`
+// because super class also asked to override it
 
 @end
 
